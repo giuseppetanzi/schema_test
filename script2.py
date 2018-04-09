@@ -20,7 +20,7 @@ mongo_client = MongoClient(MONGODB_URL)
 DB = 'test'
 MAIN_COLLECTION = 'mytest'
 TARGET_COLLECTION = 'chiavi'
-
+filePath="/Users/gtanzi/queries"
 
 
 
@@ -44,14 +44,14 @@ def do_update(*args):
     clienti_search = db.get_collection(TARGET_COLLECTION)
     results = clienti.find()
     index = 0
-    clienti_search.drop()
+#    clienti_search.drop()
     bulkOp = clienti.initialize_unordered_bulk_op()
     for doc in results:
         index += 1
         if (index % 10000) == 0:
             print(index)
             bulkOp.execute()
-            bulkOp = clienti_search.initialize_unordered_bulk_op()        
+            bulkOp = clienti.initialize_unordered_bulk_op()        
         A_names = doc.get("INTESTAZIONE_A")
         B_names = doc.get("INTESTAZIONE_B")
         id = doc.get("_id")
@@ -61,10 +61,11 @@ def do_update(*args):
         update = {}
         update['searchKey'] = mergedList
         bulkOp.find({"_id":id}).update({"$set":update})
- #       bulkOp.insert(update)
+        
+         
+         #       bulkOp.insert(update)
 
     bulkOp.execute()   
-#        clienti_search.update_one({'parent_id':id}, {'$set':update}, upsert=True)
         
 ####
 # Print out how to use this script
@@ -96,7 +97,7 @@ def merge(a_names,b_names):
 
 
 def printOnFile(string):
-    outFile = open("/Users/gtanzi/queries","a")
+    outFile = open(filePath,"a")
     outFile.write(string+"\n")
     outFile.close()
 
