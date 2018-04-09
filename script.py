@@ -81,6 +81,7 @@ def print_commands_error(command):
 def merge(a_names,b_names):
     finalList = []
     for a_name in a_names:
+        finalList.append("A:" + a_name)
         resultBase = "A:" + a_name + ",B:"
         for b_name in b_names:
             result = resultBase + b_name
