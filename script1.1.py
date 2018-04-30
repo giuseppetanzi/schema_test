@@ -41,17 +41,17 @@ def main():
 def do_update(*args):
     db = mongo_client.get_database(DB)
     clienti = db.get_collection(MAIN_COLLECTION)
-    clienti_search = db.get_collection(TARGET_COLLECTION)
+    clienti_target = db.get_collection(TARGET_COLLECTION)
     results = clienti.find()
     index = 0
-    clienti_search.drop()
-    bulkOp = clienti_search.initialize_unordered_bulk_op()
+    clienti_target.drop()
+    bulkOp = clienti_target.initialize_unordered_bulk_op()
     for doc in results:
         index += 1
         if (index % 10000) == 0:
             print(index)
             bulkOp.execute()
-            bulkOp = clienti_search.initialize_unordered_bulk_op()        
+            bulkOp = clienti_target.initialize_unordered_bulk_op()        
         A_names = doc.get("INTESTAZIONE_A")
         B_names = doc.get("INTESTAZIONE_B")
         id = doc.get("_id")
@@ -62,7 +62,7 @@ def do_update(*args):
         bulkOp.insert(doc)
 
     bulkOp.execute()   
-#        clienti_search.update_one({'parent_id':id}, {'$set':update}, upsert=True)
+#        clienti_target.update_one({'parent_id':id}, {'$set':update}, upsert=True)
         
 ####
 # Print out how to use this script

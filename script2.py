@@ -18,54 +18,50 @@ MONGODB_URL = 'mongodb://localhost:27017'
 
 mongo_client = MongoClient(MONGODB_URL)
 DB = 'test'
-MAIN_COLLECTION = 'mytest'
-TARGET_COLLECTION = 'chiavi'
-filePath="/Users/gtanzi/queries"
-
+MAIN_COLLECTION = 'mynewtest'
+TARGET_COLLECTION = 'target4'
+logPath="/Users/gtanzi/queries"
+maxWords = 4
 
 
 ####
 # Main start function
 ####
 def main():
-    print(' ')
-
-    if len(sys.argv) < 2:
-        print('Error: No command argument provided')
-        print_usage()
-    else:
-        command = sys.argv[1].strip().upper()
-        COMMANDS.get(command, print_commands_error)(command)
+    do_update()
 
 
-def do_update(*args):
+def do_update():
     db = mongo_client.get_database(DB)
     clienti = db.get_collection(MAIN_COLLECTION)
-    clienti_search = db.get_collection(TARGET_COLLECTION)
-    results = clienti.find()
+    clienti_target = db.get_collection(TARGET_COLLECTION)
+    clienti_target.drop()
+    results = clienti.find({'CONTROLLO_INT':'F'})
     index = 0
-#    clienti_search.drop()
-    bulkOp = clienti.initialize_unordered_bulk_op()
+    bulkOp = clienti_target.initialize_unordered_bulk_op()
     for doc in results:
         index += 1
         if (index % 10000) == 0:
             print(index)
             bulkOp.execute()
-            bulkOp = clienti.initialize_unordered_bulk_op()        
-        A_names = doc.get("INTESTAZIONE_A")
-        B_names = doc.get("INTESTAZIONE_B")
-        id = doc.get("_id")
+            bulkOp = clienti_target.initialize_unordered_bulk_op()        
+        chiavi = doc.get("CHIAVE_RICERCA_INTESTAZIONE")
+        A_names = []
+        B_names = []
+        for chiave in chiavi:
+            if chiave['VALORE'].startswith('A:'):
+                A_names.append(chiave['VALORE'][2:])
+            elif chiave['VALORE'].startswith('B:'):
+                B_names.append(chiave['VALORE'][2:])
+                
         combANames = combine(A_names)
         combBNames = combine(B_names)
         mergedList = merge(combANames,combBNames)
-        update = {}
-        update['searchKey'] = mergedList
-        bulkOp.find({"_id":id}).update({"$set":update})
-        
-         
-         #       bulkOp.insert(update)
+        doc['searchKey'] = mergedList
+        bulkOp.insert(doc)
 
     bulkOp.execute()   
+#        clienti_target.update_one({'parent_id':id}, {'$set':update}, upsert=True)
         
 ####
 # Print out how to use this script
@@ -97,12 +93,30 @@ def merge(a_names,b_names):
 
 
 def printOnFile(string):
-    outFile = open(filePath,"a")
+    outFile = open(logPath,"a")
     outFile.write(string+"\n")
     outFile.close()
 
 
+
 def combine(names):
+    names.sort()
+    comb = []
+    for i in range(min(len(names),maxWords)):
+        comb += combinations(names, i+1)
+    comb_list = [ list(t) for t in comb ]
+    comb_strings = []
+    for elem in comb_list:
+        result = ""
+        for elem2 in elem:
+            result += (elem2 + ",")
+         
+        result = result[:-1]
+        comb_strings.append(result)
+    return comb_strings
+
+
+def old_combine(names):
     lns = names.split()
     lns.sort()
     comb = []
@@ -119,6 +133,8 @@ def combine(names):
         comb_strings.append(result)
     return comb_strings
 
+
+
 # Constants
 
 
@@ -133,6 +149,6 @@ COMMANDS = {
 # Main
 ####
 if __name__ == '__main__':
-    main()
+    do_update()
 
 
