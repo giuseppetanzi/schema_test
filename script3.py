@@ -88,9 +88,9 @@ def do_update(switch):
     doc = {}
 
     if switch == "B":
-        clienti_target.create_index([("CHIAVE_B", ASCENDING), ("CHIAVI_A", ASCENDING)])
+        clienti_target.create_index([("KEY_B", ASCENDING), ("KEYS_A", ASCENDING)])
     else:
-        clienti_target.create_index([("CHIAVE_A", ASCENDING), ("CHIAVI_B", ASCENDING)])
+        clienti_target.create_index([("KEY_A", ASCENDING), ("KEYS_B", ASCENDING)])
 
     for doc in results:
         try:
@@ -99,9 +99,9 @@ def do_update(switch):
                 print ("RUN " + str(index))
                 bulk_op.execute()
                 bulk_op = clienti_target.initialize_unordered_bulk_op()
-            chiavi = doc.get("CHIAVE_RICERCA_INTESTAZIONE")
+            chiavi = doc.get("SEARCH_HEADER")
             id = doc.get("_id")
-            del doc['CHIAVE_RICERCA_INTESTAZIONE']
+            del doc['SEARCH_HEADER']
             del doc['_id']
 
             fname_set = set()
@@ -115,25 +115,25 @@ def do_update(switch):
 
             if switch == "B":
                 for name in fname_set:
-                    doc["CHIAVE_B"] = name
+                    doc["KEY_B"] = name
                     doc["id_padre"] = id
                     tmp_array = fname_set.copy()
 
                     tmp_array.remove(name)
-                    doc["CHIAVI_B"] = list(tmp_array)
+                    doc["KEYS_B"] = list(tmp_array)
 
-                    doc["CHIAVI_A"] = list(lname_set)
+                    doc["KEYS_A"] = list(lname_set)
                     bulk_op.insert(doc.copy())
             else:
                 for name in lname_set:
-                    doc["CHIAVE_A"] = name
+                    doc["KEY_A"] = name
                     doc["id_padre"] = id
                     tmp_array = lname_set.copy()
 
                     tmp_array.remove(name)
-                    doc["CHIAVI_A"] = list(tmp_array)
+                    doc["KEYS_A"] = list(tmp_array)
 
-                    doc["CHIAVI_B"] = list(fname_set)
+                    doc["KEYS_B"] = list(fname_set)
                     bulk_op.insert(doc.copy())
 
 

@@ -34,7 +34,7 @@ def do_update(*args):
     clienti = db.get_collection(MAIN_COLLECTION)
     clienti_target = db.get_collection(TARGET_COLLECTION)
     clienti_target.drop()
-    results = clienti.find({'CONTROLLO_INT':'F'})
+    results = clienti.find({'ACCOUNT_TYPE':'F'})
     index = 0
     bulkOp = clienti_target.initialize_unordered_bulk_op()
     doc={}
@@ -46,22 +46,22 @@ def do_update(*args):
                     print(index)
                     bulkOp.execute()
                     bulkOp = clienti_target.initialize_unordered_bulk_op()        
-                chiavi = doc.get("CHIAVE_RICERCA_INTESTAZIONE")
+                chiavi = doc.get("SEARCH_HEADER")
                 A_valori = []
                 B_valori = []
                 randomInt = random.randint(1,100000)
                 if randomInt == 1:
                     printOnFile( str(chiavi) )
                 for chiave in chiavi:
-                    if chiave['VALORE'].startswith('A:'):
-                        chiave['VALORE'] = chiave['VALORE'][2:]
+                    if chiave['VALUE'].startswith('A:'):
+                        chiave['VALUE'] = chiave['VALUE'][2:]
                         A_valori.append(chiave)
-                    elif chiave['VALORE'].startswith('B:'):
-                        chiave['VALORE'] = chiave['VALORE'][2:]
+                    elif chiave['VALUE'].startswith('B:'):
+                        chiave['VALUE'] = chiave['VALUE'][2:]
                         B_valori.append(chiave)
-                doc['CHIAVE_RICERCA_INTESTAZIONE_A'] = A_valori
-                doc['CHIAVE_RICERCA_INTESTAZIONE_B'] = B_valori
-                del doc['CHIAVE_RICERCA_INTESTAZIONE']
+                doc['SEARCH_HEADER_A'] = A_valori
+                doc['SEARCH_HEADER_B'] = B_valori
+                del doc['SEARCH_HEADER']
                 bulkOp.insert(doc)
         
             bulkOp.execute()   

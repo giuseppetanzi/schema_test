@@ -36,7 +36,7 @@ def do_update():
     clienti = db.get_collection(MAIN_COLLECTION)
     clienti_target = db.get_collection(TARGET_COLLECTION)
     clienti_target.drop()
-    results = clienti.find({'CONTROLLO_INT':'F'})
+    results = clienti.find({'ACCOUNT_TYPE':'F'})
     index = 0
     bulkOp = clienti_target.initialize_unordered_bulk_op()
     for doc in results:
@@ -45,14 +45,14 @@ def do_update():
             print(index)
             bulkOp.execute()
             bulkOp = clienti_target.initialize_unordered_bulk_op()        
-        chiavi = doc.get("CHIAVE_RICERCA_INTESTAZIONE")
+        chiavi = doc.get("SEARCH_HEADER")
         A_names = []
         B_names = []
         for chiave in chiavi:
-            if chiave['VALORE'].startswith('A:'):
-                A_names.append(chiave['VALORE'][2:])
-            elif chiave['VALORE'].startswith('B:'):
-                B_names.append(chiave['VALORE'][2:])
+            if chiave['VALUE'].startswith('A:'):
+                A_names.append(chiave['VALUE'][2:])
+            elif chiave['VALUE'].startswith('B:'):
+                B_names.append(chiave['VALUE'][2:])
                 
         combANames = combine(A_names)
         combBNames = combine(B_names)
